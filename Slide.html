@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Context</title>
+		<style>
+			body {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+h1, h2, h3 {
+	font-weight: 400;
+	margin-bottom: 0;
+}
+.remark-slide-content h1 { font-size: 3em; }
+.remark-slide-content h2 { font-size: 2em; }
+.remark-slide-content h3 { font-size: 1.6em; }
+.footnote {
+	position: absolute;
+	bottom: 3em;
+}
+li p { line-height: 1.25em; }
+.red { color: #fa0000; }
+.large { font-size: 2em; }
+a, a > code {
+	color: rgb(249, 38, 114);
+	text-decoration: none;
+}
+code {
+	background: none repeat scroll 0 0 #F8F8FF;
+  border: 1px solid #DEDEDE;
+  border-radius: 3px 	;
+  padding: 0 0.2em;
+}
+.remark-code, .remark-inline-code { font-family: "Bitstream Vera Sans Mono", "Courier", monospace; }
+.remark-code-line-highlighted     { background-color: #373832; }
+.pull-left {
+	float: left;
+	width: 47%;
+}
+.pull-right {
+	float: right;
+	width: 47%;
+}
+.pull-right ~ p {
+	clear: both;
+}
+#slideshow .slide .content code {
+	font-size: 0.8em;
+}
+#slideshow .slide .content pre code {
+	font-size: 0.9em;
+	padding: 15px;
+}
+.main-title, .title {
+	background: #272822;
+	color: #777872;
+	text-shadow: 0 0 20px #333;
+}
+.title h1, .title h2, .main-title h1, .main-title h2 {
+	color: #f3f3f3;
+	line-height: 0.8em;
+}
+/* Custom */
+.remark-code {
+	display: block;
+	padding: 0.5em;
+}
+
+		</style>
+	</head>
+	<body>
+		<textarea id="source">
+------
+
+[TOC]
+
+---
+
+# Context 
+
+**NASA – VIPER GenAI use-case:**
+
+NASA has an annual publication (attached) that they manually type up and publish 1x every February. Multiple people submit sections of the attached document and someone manually pieces it all together to review before its published to the public. The input data comes from an application that hosts all of their goals and objectives for the year - but it is classified so I cannot share it with you, but essentially it will say something like:
+
+“Environmental Goal: Do not exceed $500K of spend – Achieved Y or N – *Commentary* on why it was or was not achieved.”
+
+This bullet from AchieveIT gets expanded on by the user, and put into paragraph form in the attached. 
+
+**Key Points:**
+Our current proposed solution is to train an LLM on historic input data, to be able to use GenAI to create a first draft of the language of the document attached. 
+No charts, pictures, or graphics of any kind are in scope currently. 
+Unsure if we will get API access to AchieveIT. Other forms of data transfer should be considered. 
+Note the size of this output document is huge.  Can vary 100-150 pages depending on year. 
+Must be local model as this trained data cannot risk hitting the internet before it is published. 
+We need the model to learn over time to improve its outputs based on user-input. 
+The data inputs are confidential. 
+We propose potentially hosting this application in our Deloitte Cloud (AIEE, which is FEDRAMP -moderate). 
+
+**Questions to answer:**
+
+How would you approach this?
+What model would you recommend we use? 
+Any hosting issues?
+What are the risks you can forsee given what you know? 
+Any security implications?
+Any testing concerns/ issues?
+
+
+
+---
+
+---
+
+# Solution
+
+
+
+## 1. Requirement Understading
+
+#### Requirement 
+
+Auto generate NASA performance goal report
+
+For each goal,  using structured input data to generate standard paragraphs for report 
+
+
+
+#### Key capaibilities Identified
+
+- Extracting and Structuring Input data
+- Text generation with fixed formatting
+
+- Custim tone & content in science topics 
+
+---
+
+## 2. Approach - Build LLM App
+
+### 1) Modelling 
+
+#### a. prompt engineering (e.i. In-Context Learning)
+
+​	Easiest approach, short term solution, decent performance score
+
+
+
+-  Tuning-free Alignment Methods.
+
+  - 1 Base Instruction
+
+  - 3 Example Query & Answer
+
+    ![image-20231206122737245](/Users/chuchwu/Library/Application Support/typora-user-images/image-20231206122737245.png)
+
+​		Ref: [ https://doi.org/10.48550/arXiv.2312.01552](https://doi.org/10.48550/arXiv.2312.01552)
+
+​		THE UNLOCKING SPELL ON BASE LLMS: RETHINKING ALIGNMENT VIA IN-CONTEXT LEARNING by Bill Yuchen Lin, Abhilasha Ravichander,  Allen Institute for Artificial Intelligence, 2023 Dec 
+
+---
+
+#### b. embedding modelling
+
+​		•  feeding doc as embeddings
+
+​		• input API -> or self orgnizing to structural data JSON
+
+​		•  generate consistent and accurate outputs
+
+#### c. Fine-tuning
+
+​	Time consuming, in need of large amount of GPU
+
+---
+
+### 2) Architechture
+
+#### Local structure
+
+![image-20231206121138016](/Users/chuchwu/Library/Application Support/typora-user-images/image-20231206121138016.png)
+
+Ref: [The architecture of today's LLM applications - The GitHub Blog](https://github.blog/2023-10-30-the-architecture-of-todays-llm-applications/#:~:text=Five steps to building an LLM app 1,5. Conduct online evaluations of your app. )
+
+---
+
+#### Cloud Infrastructure
+
+![img](https://miro.medium.com/v2/resize:fit:1400/0*d75K5WTkwyslFc6W.png)
+
+---
+
+## 3. Model Choice
+
+#### Model Choice 
+
+| Consideration            | Details                                                      |      |
+| ------------------------ | :----------------------------------------------------------- | ---- |
+| **Commercial Licensing** | [list of open LLMs that are licensed for commercial use](https://github.com/eugeneyan/open-llms). |      |
+| **Model size**           | 7 to 175 billion                                             |      |
+| **Model performance**    | pre-prudction tests on Model performance                     |      |
+
+**pre-prudction tests on Model performance**
+
+ - Coheriense 
+ - Comprehensiveness
+ - Speed/Latency
+ - GPU usage
+
+---
+
+#### **Improvement Strategy** 
+
+- ##### Improve on content generation
+
+  Feed more context documentations.
+
+  Build Embeddings based on the context.
+
+  ![llm chatbot embedding database](https://i0.wp.com/bdtechtalks.com/wp-content/uploads/2023/05/llm-chatbot-embedding-database.jpg?resize=696%2C435&ssl=1)
+
+  ---
+
+- ##### Improve response speed 
+
+  Skeleton of Thought decoding
+
+![SoT - Figure 3: A bar plot showing the average speed-up of Skeleton-of-Thought on different models. Each bar corresponds to one model. The figure shows that Skeleton-of-Thought provides speed-up for all models. The speed-up ranges from 1.13x to 2.39x.](https://www.microsoft.com/en-us/research/uploads/prod/2023/11/SoT-blog_Figure3.png)
+
+​	Accelerate the end-to-end generation of LLMs by 2x without any change to the model, system, or hardware
+
+
+
+![A figure showing the difference between the normal sequential decoding approach and the Skeleton-of-Thought approach. Given a question, the left part of the figure shows that the normal sequential decoding approach generates the answer sequentially from the beginning to the end. The right part of the figure shows that the Skeleton-of-Thought approach first prompts the LLM to give a skeleton of answer and then expand multiple points in the skeleton in parallel to get the final answer.](https://www.microsoft.com/en-us/research/uploads/prod/2023/11/SoT-blog_Figure2.png)
+
+Ref: [skeleton-of-thought | 🦜️🔗 Langchain](https://python.langchain.com/docs/templates/skeleton-of-thought)
+
+
+
+---
+
+## 3.  Potential Issues & Mitigation
+
+- #### Issues on Model side 
+
+​	high GPU usage on High-dimensionality 
+
+​	Out-of-vocabulary words
+
+​	harmful/offensive content
+
+​	wrong in number - 2M vs 20M
+
+​	hallucination on Domain adaptation
+
+---
+
+- #### Mitigations
+
+![image-20231206121043126](/Users/chuchwu/Library/Application Support/typora-user-images/image-20231206121043126.png)
+
+Ref: https://eugeneyan.com/writing/llm-patterns/
+
+---
+
+- #### Security Implications & mitigations
+
+| Issue                                                        | Mitigation                                                   |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| data exposed via LLM providers like OpenAI, Microsoft Azure, Google Cloud Platform, etc | Understand vendor’s license agreement                        |
+| exposed via LLM-based apps to unauthorized users             | expected availability requirements (e.g., SLA) for all internal and external users |
+| insecure source code                                         | vendor qualification                                         |
+
+---
+
+## 4. Timeline
+
+| Week     | Action                                                       |
+| -------- | ------------------------------------------------------------ |
+| week 1   | document gathering feed initial data, test models, model choice |
+| week 2,3 | in-context learning, embedding modelling                     |
+| week 4   | evaluate and mitigate risks                                  |
+
+---
+
+## 5. Demo
+
+![image-20231206123447313](/Users/chuchwu/Library/Application Support/typora-user-images/image-20231206123447313.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		</textarea>
+		<script src="https://gnab.github.io/remark/downloads/remark-latest.min.js"></script>
+		<script>
+			var slideshow = remark.create();
+		</script>
+		<script></script>
+	</body>
+</html>
